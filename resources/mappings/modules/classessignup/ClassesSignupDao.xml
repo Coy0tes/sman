@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.classessignup.dao.ClassesSignupDao">
+    
+	<sql id="classesSignupColumns">
+		a.id AS "id",
+		a.bmbh AS "bmbh",
+		a.bmr AS "bmr",
+		a.bmrname AS "bmrname",
+		a.classesid AS "classesid",
+		a.classesname AS "classesname",
+		a.ksrq AS "ksrq",
+		a.bmzs AS "bmzs",
+		a.lxsj AS "lxsj",
+		a.qyj AS "qyj",
+		a.yedk AS "yedk",
+		a.sjynqyj AS "sjynqyj",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="classesSignupJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="ClassesSignup" >
+		SELECT 
+			<include refid="classesSignupColumns"/>
+		FROM classes_signup a
+		<include refid="classesSignupJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="ClassesSignup" >
+		SELECT 
+			<include refid="classesSignupColumns"/>
+		FROM classes_signup a
+		<include refid="classesSignupJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="bmbh != null and bmbh != ''">
+				AND a.bmbh LIKE 
+					<if test="dbName == 'oracle'">'%'||#{bmbh}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{bmbh}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{bmbh},'%')</if>
+			</if>
+			<if test="bmrname != null and bmrname != ''">
+				AND a.bmrname LIKE 
+					<if test="dbName == 'oracle'">'%'||#{bmrname}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{bmrname}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{bmrname},'%')</if>
+			</if>
+			<if test="classesname != null and classesname != ''">
+				AND a.classesname LIKE 
+					<if test="dbName == 'oracle'">'%'||#{classesname}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{classesname}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{classesname},'%')</if>
+			</if>
+			<if test="lxsj != null and lxsj != ''">
+				AND a.lxsj LIKE 
+					<if test="dbName == 'oracle'">'%'||#{lxsj}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{lxsj}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{lxsj},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="ClassesSignup" >
+		SELECT 
+			<include refid="classesSignupColumns"/>
+		FROM classes_signup a
+		<include refid="classesSignupJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO classes_signup(
+			id,
+			bmbh,
+			bmr,
+			bmrname,
+			classesid,
+			classesname,
+			ksrq,
+			bmzs,
+			lxsj,
+			qyj,
+			yedk,
+			sjynqyj,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{bmbh},
+			#{bmr},
+			#{bmrname},
+			#{classesid},
+			#{classesname},
+			#{ksrq},
+			#{bmzs},
+			#{lxsj},
+			#{qyj},
+			#{yedk},
+			#{sjynqyj},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE classes_signup SET 	
+			bmbh = #{bmbh},
+			bmr = #{bmr},
+			bmrname = #{bmrname},
+			classesid = #{classesid},
+			classesname = #{classesname},
+			ksrq = #{ksrq},
+			bmzs = #{bmzs},
+			lxsj = #{lxsj},
+			qyj = #{qyj},
+			yedk = #{yedk},
+			sjynqyj = #{sjynqyj},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM classes_signup
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE classes_signup SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="ClassesSignup" statementType="STATEMENT">
+		select * FROM classes_signup  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.siteremark.dao.SiteRemarkDao">
+    
+	<sql id="siteRemarkColumns">
+		a.id AS "id",
+		a.memberid AS "memberid",
+		a.membername AS "membername",
+		a.contents AS "contents",
+		a.siteid AS "siteid",
+		s.name AS "sitename",
+		a.shzt AS "shzt",
+		a.shrid AS "shrid",
+		a.shrname AS "shrname",
+		a.shsj AS "shsj",
+		a.shbtgyy AS "shbtgyy",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="siteRemarkJoins">
+		LEFT JOIN member m ON m.id = a.memberid
+		LEFT JOIN site s ON s.id = a.siteid
+	</sql>
+	
+    
+	<select id="get" resultType="SiteRemark" >
+		SELECT 
+			<include refid="siteRemarkColumns"/>
+		FROM site_remark a
+		<include refid="siteRemarkJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="SiteRemark" >
+		SELECT 
+			<include refid="siteRemarkColumns"/>
+		FROM site_remark a
+		<include refid="siteRemarkJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="membername != null and membername != ''">
+				AND a.membername LIKE 
+					<if test="dbName == 'oracle'">'%'||#{membername}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{membername}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{membername},'%')</if>
+			</if>
+			<if test="siteid != null and siteid != ''">
+				AND a.siteid LIKE 
+					<if test="dbName == 'oracle'">'%'||#{siteid}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{siteid}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{siteid},'%')</if>
+			</if>
+			<if test="shzt != null and shzt != ''">
+				AND a.shzt LIKE 
+					<if test="dbName == 'oracle'">'%'||#{shzt}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{shzt}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{shzt},'%')</if>
+			</if>
+			<if test="shrname != null and shrname != ''">
+				AND a.shrname LIKE 
+					<if test="dbName == 'oracle'">'%'||#{shrname}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{shrname}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{shrname},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="SiteRemark" >
+		SELECT 
+			<include refid="siteRemarkColumns"/>
+		FROM site_remark a
+		<include refid="siteRemarkJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO site_remark(
+			id,
+			memberid,
+			membername,
+			contents,
+			siteid,
+			shzt,
+			shrid,
+			shrname,
+			shsj,
+			shbtgyy,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{memberid},
+			#{membername},
+			#{contents},
+			#{siteid},
+			#{shzt},
+			#{shrid},
+			#{shrname},
+			#{shsj},
+			#{shbtgyy},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE site_remark SET 	
+			memberid = #{memberid},
+			membername = #{membername},
+			contents = #{contents},
+			siteid = #{siteid},
+			shzt = #{shzt},
+			shrid = #{shrid},
+			shrname = #{shrname},
+			shsj = #{shsj},
+			shbtgyy = #{shbtgyy},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM site_remark
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE site_remark SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="SiteRemark" statementType="STATEMENT">
+		select * FROM site_remark  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

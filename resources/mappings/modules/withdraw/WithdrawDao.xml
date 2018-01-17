@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.withdraw.dao.WithdrawDao">
+    
+	<sql id="withdrawColumns">
+		a.id AS "id",
+		a.sqrid AS "sqrid",
+		a.sqrname AS "sqrname",
+		a.jine AS "jine",
+		a.shzt AS "shzt",
+		a.shrid AS "shrid",
+		a.shrname AS "shrname",
+		a.shsj AS "shsj",
+		a.shbtgyy AS "shbtgyy",
+		a.lqzt AS "lqzt",
+		a.lqsj AS "lqsj",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="withdrawJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="Withdraw" >
+		SELECT 
+			<include refid="withdrawColumns"/>
+		FROM withdraw a
+		<include refid="withdrawJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Withdraw" >
+		SELECT 
+			<include refid="withdrawColumns"/>
+		FROM withdraw a
+		<include refid="withdrawJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="sqrname != null and sqrname != ''">
+				AND a.sqrname LIKE 
+					<if test="dbName == 'oracle'">'%'||#{sqrname}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{sqrname}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{sqrname},'%')</if>
+			</if>
+			<if test="shzt != null and shzt != ''">
+				AND a.shzt = #{shzt}
+			</if>
+			<if test="lqzt != null and lqzt != ''">
+				AND a.lqzt = #{lqzt}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Withdraw" >
+		SELECT 
+			<include refid="withdrawColumns"/>
+		FROM withdraw a
+		<include refid="withdrawJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO withdraw(
+			id,
+			sqrid,
+			sqrname,
+			jine,
+			shzt,
+			shrid,
+			shrname,
+			shsj,
+			shbtgyy,
+			lqzt,
+			lqsj,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{sqrid},
+			#{sqrname},
+			#{jine},
+			#{shzt},
+			#{shrid},
+			#{shrname},
+			#{shsj},
+			#{shbtgyy},
+			#{lqzt},
+			#{lqsj},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE withdraw SET 	
+			sqrid = #{sqrid},
+			sqrname = #{sqrname},
+			jine = #{jine},
+			shzt = #{shzt},
+			shrid = #{shrid},
+			shrname = #{shrname},
+			shsj = #{shsj},
+			shbtgyy = #{shbtgyy},
+			lqzt = #{lqzt},
+			lqsj = #{lqsj},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM withdraw
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE withdraw SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="Withdraw" statementType="STATEMENT">
+		select * FROM withdraw  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

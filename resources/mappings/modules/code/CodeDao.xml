@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.code.dao.CodeDao">
+    
+	<sql id="codeColumns">
+		a.id AS "id",
+		a.codes AS "code",
+		a.ffrqq AS "ffrqq",
+		a.ffrqz AS "ffrqz",
+		a.yxrqq AS "yxrqq",
+		a.yxrqz AS "yxrqz",
+		a.status AS "status",
+		a.lyr AS "member.id",
+		a.lysj AS "lysj",
+		a.sysj AS "sysj",
+		a.orderid AS "orderid",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		member.name AS "member.name",
+		member.name AS "lyr"
+	</sql>
+	
+	<sql id="codeJoins">
+		LEFT JOIN member member ON member.id = a.lyr
+	</sql>
+	
+    
+	<select id="get" resultType="Code" >
+		SELECT 
+			<include refid="codeColumns"/>
+		FROM codes a
+		<include refid="codeJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Code" >
+		SELECT 
+			<include refid="codeColumns"/>
+		FROM codes a
+		<include refid="codeJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="code != null and code != ''">
+				AND a.codes LIKE 
+					<if test="dbName == 'oracle'">'%'||#{code}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{code}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{code},'%')</if>
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status LIKE 
+					<if test="dbName == 'oracle'">'%'||#{status}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{status}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{status},'%')</if>
+			</if>
+			<if test="member != null and member.id != null and member.id != ''">
+				AND a.lyr LIKE 
+					<if test="dbName == 'oracle'">'%'||#{member.id}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{member.id}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{member.id},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Code" >
+		SELECT 
+			<include refid="codeColumns"/>
+		FROM codes a
+		<include refid="codeJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findCode" resultType="Integer">
+		SELECT COUNT(1) FROM codes c 
+		WHERE c.codes = #{code}
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO codes(
+			id,
+			codes,
+			ffrqq,
+			ffrqz,
+			yxrqq,
+			yxrqz,
+			status,
+			lyr,
+			lysj,
+			sysj,
+			orderid,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{code},
+			#{ffrqq},
+			#{ffrqz},
+			#{yxrqq},
+			#{yxrqz},
+			#{status},
+			#{member.id},
+			#{lysj},
+			#{sysj},
+			#{orderid},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE codes SET 	
+			codes = #{code},
+			ffrqq = #{ffrqq},
+			ffrqz = #{ffrqz},
+			yxrqq = #{yxrqq},
+			yxrqz = #{yxrqz},
+			status = #{status},
+			lyr = #{member.id},
+			lysj = #{lysj},
+			sysj = #{sysj},
+			orderid = #{orderid},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM codes
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE codes SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="Code" statementType="STATEMENT">
+		select * FROM codes  where ${propertyName} = '${value}'
+	</select>
+	
+	<select id="findListBymember" resultType="Member">
+		SELECT 
+			*
+		FROM member a
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+				<if test="dbName == 'oracle'">#{name}||'%'</if>
+				<if test="dbName == 'mssql'">#{name}+'%'</if>
+				<if test="dbName == 'mysql'">concat(#{name},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+</mapper>

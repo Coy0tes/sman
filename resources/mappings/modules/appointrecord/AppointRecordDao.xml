@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.appointrecord.dao.AppointRecordDao">
+    
+	<sql id="appointRecordColumns">
+		a.id AS "id",
+		a.yybh AS "yybh",
+		a.yyr AS "yyr",
+		a.yyrname AS "yyrname",
+		a.yyrdh AS "yyrdh",
+		a.cardid AS "cardid",
+		b.cardbh AS "cardbh",
+		a.siteid AS "siteid",
+		a.sitename AS "sitename",
+		a.yysj AS "yysj",
+		a.yyqrcode AS "yyqrcode",
+		a.status AS "status",
+		a.sysj AS "sysj",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="appointRecordJoins">
+		left join card b on a.cardid = b.id
+	</sql>
+	
+    
+	<select id="get" resultType="AppointRecord" >
+		SELECT 
+			<include refid="appointRecordColumns"/>
+		FROM appoint_record a
+		<include refid="appointRecordJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="AppointRecord" >
+		SELECT 
+			<include refid="appointRecordColumns"/>
+		FROM appoint_record a
+		<include refid="appointRecordJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="yybh != null and yybh != ''">
+				AND a.yybh LIKE concat('%',#{yybh},'%')
+			</if>
+			<if test="yyrname != null and yyrname != ''">
+				AND a.yyrname LIKE concat('%',#{yyrname},'%')
+			</if>
+			<if test="cardid != null and cardid != ''">
+				AND a.cardid = #{cardid}
+			</if>
+			<if test="sitename != null and sitename != ''">
+				AND a.sitename LIKE concat('%',#{sitename},'%')
+			</if>
+			<if test="siteid != null and siteid != ''">
+				AND a.siteid = #{siteid}
+			</if>
+			<if test="yysj != null and yysj != ''">
+				AND a.yysj = #{yysj}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="sysj != null and sysj != ''">
+				AND a.sysj = #{sysj}
+			</if>
+			<if test="cardbh != null and cardbh != ''">
+				AND b.cardbh LIKE concat('%',#{cardbh},'%')
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="AppointRecord" >
+		SELECT 
+			<include refid="appointRecordColumns"/>
+		FROM appoint_record a
+		<include refid="appointRecordJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO appoint_record(
+			id,
+			yybh,
+			yyr,
+			yyrname,
+			yyrdh,
+			cardid,
+			siteid,
+			sitename,
+			yysj,
+			yyqrcode,
+			status,
+			sysj,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{yybh},
+			#{yyr},
+			#{yyrname},
+			#{yyrdh},
+			#{cardid},
+			#{siteid},
+			#{sitename},
+			#{yysj},
+			#{yyqrcode},
+			#{status},
+			#{sysj},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE appoint_record SET 	
+			yybh = #{yybh},
+			yyr = #{yyr},
+			yyrname = #{yyrname},
+			yyrdh = #{yyrdh},
+			cardid = #{cardid},
+			siteid = #{siteid},
+			sitename = #{sitename},
+			yysj = #{yysj},
+			yyqrcode = #{yyqrcode},
+			status = #{status},
+			sysj = #{sysj},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM appoint_record
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE appoint_record SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="AppointRecord" statementType="STATEMENT">
+		select * FROM appoint_record  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

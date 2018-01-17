@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.site.dao.SiteDao">
+    
+	<sql id="siteColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.sitetype AS "sitetype.id",
+		(select name from site_type where id=a.sitetype) AS "sitetype.name",
+		a.simg AS "simg",
+		a.mobile AS "mobile",
+		a.longitude AS "longitude",
+		a.latitude AS "latitude",
+		a.label AS "label",
+		a.contents AS "contents",
+		a.devices AS "devices",
+		a.province AS "province",
+		a.city AS "city",
+		a.county AS "county",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.orderoc AS "orderoc",
+		a.maxordernumday AS "maxordernumday",
+		a.noorderrqq AS "noorderrqq",
+		a.noorderrqz AS "noorderrqz"
+	</sql>
+	
+	<sql id="siteJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="Site" >
+		SELECT 
+			<include refid="siteColumns"/>
+		FROM site a
+		<include refid="siteJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Site" >
+		SELECT 
+			<include refid="siteColumns"/>
+		FROM site a
+		<include refid="siteJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE concat('%',#{name},'%')
+			</if>
+			<if test="sitetype != null and sitetype.id != null and sitetype.id != ''">
+				AND a.sitetype = #{sitetype.id}
+			</if>
+			<if test="mobile != null and mobile != ''">
+				AND a.mobile LIKE concat('%',#{mobile},'%')
+			</if>
+			<if test="province != null and province != ''">
+				AND a.province = #{province}
+			</if>
+			<if test="city != null and city != ''">
+				AND a.city = #{city}
+			</if>
+			<if test="county != null and county != ''">
+				AND a.county = #{county}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Site" >
+		SELECT 
+			<include refid="siteColumns"/>
+		FROM site a
+		<include refid="siteJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO site(
+			id,
+			name,
+			sitetype,
+			simg,
+			mobile,
+			longitude,
+			latitude,
+			label,
+			contents,
+			devices,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			province,
+			city,
+			county,
+			orderoc,
+			maxordernumday,
+			noorderrqq,
+			noorderrqz
+		) VALUES (
+			#{id},
+			#{name},
+			#{sitetype.id},
+			#{simg},
+			#{mobile},
+			#{longitude},
+			#{latitude},
+			#{label},
+			#{contents},
+			#{devices},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{province},
+			#{city},
+			#{county},
+			#{orderoc},
+			#{maxordernumday},
+			#{noorderrqq},
+			#{noorderrqz}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE site SET 	
+			name = #{name},
+			sitetype = #{sitetype.id},
+			simg = #{simg},
+			mobile = #{mobile},
+			longitude = #{longitude},
+			latitude = #{latitude},
+			label = #{label},
+			contents = #{contents},
+			devices = #{devices},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			province = #{province},
+			city = #{city},
+			county = #{county},
+			orderoc = #{orderoc},
+			maxordernumday = #{maxordernumday},
+			noorderrqq = #{noorderrqq},
+			noorderrqz = #{noorderrqz}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM site
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE site SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="Site" statementType="STATEMENT">
+		select * FROM site  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

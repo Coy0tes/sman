@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.classmember.dao.ClassesMemberDao">
+    
+	<sql id="classesMemberColumns">
+		a.id AS "id",
+		a.memberid AS "memberid",
+		a.membername AS "membername",
+		a.classesid AS "classesid",
+		a.classesname AS "classesname",
+		a.lxsj AS "lxsj",
+		a.bmsj AS "bmsj",
+		a.signupid AS "signupid",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="classesMemberJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="ClassesMember" >
+		SELECT 
+			<include refid="classesMemberColumns"/>
+		FROM classes_member a
+		<include refid="classesMemberJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="ClassesMember" >
+		SELECT 
+			<include refid="classesMemberColumns"/>
+		FROM classes_member a
+		<include refid="classesMemberJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="membername != null and membername != ''">
+				AND a.membername LIKE 
+					<if test="dbName == 'oracle'">'%'||#{membername}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{membername}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{membername},'%')</if>
+			</if>
+			<if test="classesname != null and classesname != ''">
+				AND a.classesname LIKE 
+					<if test="dbName == 'oracle'">'%'||#{classesname}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{classesname}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{classesname},'%')</if>
+			</if>
+			<if test="lxsj != null and lxsj != ''">
+				AND a.lxsj LIKE 
+					<if test="dbName == 'oracle'">'%'||#{lxsj}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{lxsj}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{lxsj},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="ClassesMember" >
+		SELECT 
+			<include refid="classesMemberColumns"/>
+		FROM classes_member a
+		<include refid="classesMemberJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO classes_member(
+			id,
+			memberid,
+			membername,
+			classesid,
+			classesname,
+			lxsj,
+			bmsj,
+			signupid,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{memberid},
+			#{membername},
+			#{classesid},
+			#{classesname},
+			#{lxsj},
+			#{bmsj},
+			#{signupid},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE classes_member SET 	
+			memberid = #{memberid},
+			membername = #{membername},
+			classesid = #{classesid},
+			classesname = #{classesname},
+			lxsj = #{lxsj},
+			bmsj = #{bmsj},
+			signupid = #{signupid},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM classes_member
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE classes_member SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="ClassesMember" statementType="STATEMENT">
+		select * FROM classes_member  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

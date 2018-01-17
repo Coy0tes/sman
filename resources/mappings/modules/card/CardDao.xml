@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.card.dao.CardDao">
+    
+	<sql id="cardColumns">
+		a.id AS "id",
+		a.cardbh AS "cardbh",
+		a.pkgid AS "pkg.id",
+		pkg.name AS "packa",
+		a.ckr AS "ckr",
+		a.ckrname AS "memebr.id",
+		memebr.name AS "ckrname",
+		a.gksj AS "gksj",
+		a.gkjine AS "gkjine",
+		a.maxusenum AS "maxusenum",
+		a.sycs AS "sycs",
+		a.maxuserange AS "maxuserange",
+		a.gklng AS "gklng",
+		a.gklat AS "gklat",
+		a.gklabel AS "gklabel",
+		a.orderid AS "orderid",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		pkg.name AS "pkg.name",
+		memebr.name AS "memebr.name"
+	</sql>
+	
+	<sql id="cardJoins">
+		LEFT JOIN package pkg ON pkg.id = a.pkgid
+		LEFT JOIN member memebr ON memebr.id = a.ckr
+	</sql>
+	
+    
+	<select id="get" resultType="Card" >
+		SELECT 
+			<include refid="cardColumns"/>
+		FROM card a
+		<include refid="cardJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Card" >
+		SELECT 
+			<include refid="cardColumns"/>
+		FROM card a
+		<include refid="cardJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="cardbh != null and cardbh != ''">
+				AND a.cardbh LIKE 
+					<if test="dbName == 'oracle'">'%'||#{cardbh}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{cardbh}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{cardbh},'%')</if>
+			</if>
+			<if test="pkg != null and pkg.id != null and pkg.id != ''">
+				AND a.pkgid = #{pkg.id}
+			</if>
+			<if test="memebr != null and memebr.id != null and memebr.id != ''">
+				AND a.ckrname = #{memebr.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Card" >
+		SELECT 
+			<include refid="cardColumns"/>
+		FROM card a
+		<include refid="cardJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO card(
+			id,
+			cardbh,
+			pkgid,
+			ckr,
+			ckrname,
+			gksj,
+			gkjine,
+			maxusenum,
+			sycs,
+			maxuserange,
+			gklng,
+			gklat,
+			gklabel,
+			orderid,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{cardbh},
+			#{pkg.id},
+			#{ckr},
+			#{memebr.id},
+			#{gksj},
+			#{gkjine},
+			#{maxusenum},
+			#{sycs},
+			#{maxuserange},
+			#{gklng},
+			#{gklat},
+			#{gklabel},
+			#{orderid},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE card SET 	
+			cardbh = #{cardbh},
+			pkgid = #{pkg.id},
+			ckr = #{ckr},
+			ckrname = #{memebr.id},
+			gksj = #{gksj},
+			gkjine = #{gkjine},
+			maxusenum = #{maxusenum},
+			sycs = #{sycs},
+			maxuserange = #{maxuserange},
+			gklng = #{gklng},
+			gklat = #{gklat},
+			gklabel = #{gklabel},
+			orderid = #{orderid},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM card
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE card SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="Card" statementType="STATEMENT">
+		select * FROM card  where ${propertyName} = '${value}'
+	</select>
+	
+	<select id="findListBypkg" resultType="Pkg">
+		SELECT 
+			*
+		FROM package a
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+				<if test="dbName == 'oracle'">#{name}||'%'</if>
+				<if test="dbName == 'mssql'">#{name}+'%'</if>
+				<if test="dbName == 'mysql'">concat(#{name},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<select id="findListBymemebr" resultType="Member">
+		SELECT 
+			*
+		FROM member a
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+				<if test="dbName == 'oracle'">#{name}||'%'</if>
+				<if test="dbName == 'mssql'">#{name}+'%'</if>
+				<if test="dbName == 'mysql'">concat(#{name},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+</mapper>
